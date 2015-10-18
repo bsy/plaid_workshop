@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Plaid workshop</title>
+		<style>
+			.container {
+				margin: 0 auto;
+				min-width: 880px;
+				width: 92%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<button id="bofaButton">bofa</button>
+			<button id="linkButton">link</button>
+			<select id="institutions">
+				<option value="">Pick a bank</option>
+			</select>
+			<button id="selectButton" disabled>Sign in with your bank</button>
+		</div>
+
+		<script src="https://cdn.plaid.com/link/stable/link-initialize.js"></script>
+		<script>
+			'use strict';
+			var dropdown = document.querySelector('#institutions');
+			var selectButton = document.querySelector('#selectButton');
+
+			var linkHandler = Plaid.create({
+			  env: 'tartan',
+			  clientName: 'Client Name',
+			  key: 'test_key',
+			  product: 'auth',
+			  // To use Link with longtail institutions on Connect, set the
+			  // 'longTail' option to true:
+			  // longTail: true,
+			  onLoad: function() {
+			    // The Link module finished loading.
+			    for (var i = 0; i < linkHandler.institutions.length; i++) {
+			    	var newOption = document.createElement('option');
+			    	newOption.setAttribute('value', linkHandler.institutions[i].type);
+			    	newOption.innerHTML = linkHandler.institutions[i].name;
+			    	dropdown.appendChild(newOption);
+			    }
+			  },
+			  onSuccess: function(public_token) {
+			    // Send your public_token to your app server here.
+			    console.log('success!');
+			  },
+			  onExit: function() {
+			    // The user exited the Link flow.
+			    console.log('user exited!');
+			  },
+			});
+
+			dropdown.onchange = function () {
+				if (this.value) {
+					selectButton.disabled = false;
+				} else {
+					selectButton.disabled = true;
+				}
+			}
+
+			selectButton.onclick = function () {
+				if (!this.disabled) {
+					linkHandler.open(dropdown.value);
+				}
+			};
+
+			// Trigger the BofA login view
+			document.getElementById('bofaButton').onclick = function() {
+			  linkHandler.open('bofa');
+			};
+
+			// Trigger the standard institution select view
+			document.getElementById('linkButton').onclick = function() {
+			  linkHandler.open();
+			};
+		</script>
+	</body>
+</html>
