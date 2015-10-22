@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>React Tutorial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="container">
+        <div class="plaid-block">
+          
+        </div>
+    </div>
+    <!--<script type="text/babel" src="scripts/example.js"></script>-->
+    <script type="text/babel">
+      var InputField = React.createClass({
+          render: function () {
+            return (
+                <div>
+                  <label htmlFor="js-hello">what is up</label>
+                  <input id="js-hello" placeholder="Hello" />
+                </div>
+              );
+          }
+      });
+
+      var SelectField = React.createClass({
+        render: function () {
+          return (
+            <div>
+              <label htmlFor="js-select">here is a select</label>
+              <select id="js-select">
+                <option>Choose one:</option>
+              </select>
+            </div>
+          );
+        }
+      });
+
+      var Button = React.createClass({
+        render: function () {
+          return (
+            <button>Submit</button>
+          );
+        }
+      });
+
+      var PlaidForm = React.createClass({
+          render: function () {
+            return (
+              <div className="plaid-block">
+                <SelectField />
+                <Button />
+              </div>
+            )
+          }
+      });
+
+      ReactDOM.render(
+        <PlaidForm />,
+        document.querySelector('.plaid-block')
+      );
+    </script>
+  </body>
+</html>

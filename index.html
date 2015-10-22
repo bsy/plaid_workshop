@@ -21,6 +21,37 @@
 				padding: 32px 16px;
 				width: 92%;
 			}
+
+			.bank-info {
+				position: relative;
+/*				background: #fff;
+				border: 1px solid #ccc;*/
+			}
+
+			.bank-info-wrapper {
+				background: #f7f7f7;
+				border-radius: 2px;
+				box-sizing: border-box;
+				left: 0;
+				padding: 8px 12px;
+				position: absolute;
+				top: 0;
+				transition: visibility 160ms linear, transform 160ms linear, opacity 160ms linear;
+				width: 100%;
+			}
+
+			.manual-wrapper {
+				opacity: 0;
+				visibility: hidden;
+			}
+
+			.field-block {
+				display: inline-block;
+			}
+
+			.field-block label {
+				display: block;
+			}
 		</style>
 	</head>
 
@@ -28,32 +59,39 @@
 		<div class="container">
 			<!-- <button id="bofaButton">bofa</button>
 			<button id="linkButton">link</button> -->
-			<div class="js-plaid-wrapper bank-info-wrapper plaid-wrapper">
-				<select id="js-institutions" class="dropdown">
-					<option value="">Pick a bank</option>
-				</select>
-
-				<button id="js-select-button" class="btn btn-main" disabled>Sign in with your bank</button>
-			</div>
-
-			<div class="js-manual-wrapper bank-info-wrapper manual-wrapper">
-				<div class="">
-					<label for="js-routing">Routing Number</label>
-					<input id="js-routing" class="input" type="text" />	
-				</div>
-				
-				<div class="">
-					<label for="js-account-number">Account Number</label>
-					<input id="js-account-number" class="input" type="text" />
-				</div>
-
-				<div class="">
-					<label for="js-type">Account Type</label>
-					<select id="js-type">
-						<option value="">Please choose one</option>
-						<option value="checking">Checking</option>
-						<option value="savings">Savings</option>
+			<div class="bank-info">
+				<div class="js-plaid-wrapper bank-info-wrapper plaid-wrapper">
+					<select id="js-institutions" class="dropdown">
+						<option value="">Pick a bank</option>
 					</select>
+
+					<button id="js-select-button" class="btn btn-main" disabled>Secure sign in</button>
+				</div>
+
+				<div class="js-manual-wrapper bank-info-wrapper manual-wrapper">
+					<div class="field-block">
+						<label for="js-routing">Routing Number</label>
+						<input id="js-routing" class="input" type="text" />	
+					</div>
+					
+					<div class="field-block">
+						<label for="js-account-number">Account Number</label>
+						<input id="js-account-number" class="input" type="text" />
+					</div>
+
+					<div class="field-block">
+						<label for="js-type">Account Type</label>
+						<select id="js-type">
+							<option value="">Please choose one</option>
+							<option value="checking">Checking</option>
+							<option value="savings">Savings</option>
+						</select>
+					</div>
+
+					<div>
+						<button>Submit</button>
+						<button class="js-back">Back to plaid login</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -63,8 +101,12 @@
 		<script>
 			'use strict';
 
+			var $plaidBlock = $('.js-plaid-wrapper');
+			var $manualBlock = $('.js-manual-wrapper');
 			var $dropdown = $('#js-institutions');
 			var $selectButton = $('#js-select-button');
+			var $backButton = $('.js-back');
+			var usePlaid = true;
 
 			var linkHandler = Plaid.create({
 			  env: 'tartan',
@@ -80,8 +122,13 @@
 			    	var newOption = document.createElement('option');
 			    	newOption.setAttribute('value', linkHandler.institutions[i].type);
 			    	newOption.innerHTML = linkHandler.institutions[i].name;
-			    	$dropdown.appendChild(newOption);
+			    	$dropdown.append(newOption);
 			    }
+
+			    var lastOption = document.createElement('option');
+			    lastOption.setAttribute('value', 'missing-bank');
+			    lastOption.innerHTML = 'I don\'t see my bank';
+			    $dropdown.append(lastOption);
 			  },
 			  onSuccess: function(public_token) {
 			    // Send your public_token to your app server here.
@@ -93,19 +140,55 @@
 			  },
 			});
 
-			$dropdown.onchange = function () {
-				if (this.value) {
-					$selectButton.disabled = false;
+			$('body').on('update-display', function () {
+				if (usePlaid) {
+					showHideElements ($plaidBlock, $manualBlock)
 				} else {
-					$selectButton.disabled = true;
+					showHideElements ($manualBlock, $plaidBlock)
 				}
-			}
+			});
 
-			$selectButton.onclick = function () {
-				if (!this.disabled) {
-					linkHandler.open(dropdown.value);
+			// $dropdown.onchange = function () {
+			// 	if (this.value) {
+			// 		console.log('has value');
+			// 		$selectButton.prop('disabled', false);
+			// 	} else {
+			// 		$selectButton.prop('disabled', true);
+			// 	}
+			// }
+
+			$dropdown.on('change', function () {
+				if (this.value) {
+					$selectButton.prop('disabled', false);
+				} else {
+					$selectButton.prop('disabled', true);
 				}
-			};
+			});
+
+			// $selectButton.onclick = function () {
+			// 	if (!this.disabled) {
+			// 		if ($dropdown.prop('value') === 'missing-bank') {
+			// 		} else {
+			// 			linkHandler.open($dropdown.prop('value'));
+			// 		}
+			// 	}
+			// };
+
+			$selectButton.on('click', function () {
+				if (!this.disabled) {
+					if ($dropdown.prop('value') === 'missing-bank') {
+						usePlaid = false;
+						$('body').trigger({type: 'update-display'});
+					} else {
+						linkHandler.open($dropdown.prop('value'));
+					}
+				}
+			});
+
+			$backButton.on('click', function () {
+				usePlaid = true;
+				$('body').trigger({type: 'update-display'});
+			});
 
 			// Trigger the BofA login view
 			// document.getElementById('bofa-button').onclick = function() {
@@ -116,6 +199,20 @@
 			// document.getElementById('link-button').onclick = function() {
 			//   linkHandler.open();
 			// };
+
+			function showHideElements (toShow, toHide) {
+				toShow.css({
+					'opacity': 1,
+					'transform': 'scale(1, 1)',
+					'visibility': 'visible'
+				});
+
+				toHide.css({
+					'opacity': 0,
+					'transform': 'scale(0.98, 0.98)',
+					'visibility': 'hidden'
+				});
+			}
 		</script>
 	</body>
 </html>
