@@ -3,9 +3,22 @@
 	<head>
 		<title>Plaid workshop</title>
 		<style>
+			body {
+				background: #f7f7f7;
+				font: 16px/1.4em "San Francisco", "Helvetica Neue", "Segoe UI", "Arial", sans-serif;
+				margin: 0;
+				padding: 0;
+			}
+
+			select, input, button {
+				font: 1em "San Francisco", "Helvetica Neue", "Segoe UI", "Arial", sans-serif;
+			}
+
 			.container {
+				box-sizing: border-box;
 				margin: 0 auto;
-				min-width: 880px;
+				max-width: 880px;
+				padding: 32px 16px;
 				width: 92%;
 			}
 		</style>
@@ -13,21 +26,45 @@
 
 	<body>
 		<div class="container">
-			<button id="bofaButton">bofa</button>
-			<button id="linkButton">link</button>
-			<select id="institutions">
-				<option value="">Pick a bank</option>
-			</select>
-			<button id="selectButton" disabled>Sign in with your bank</button>
+			<!-- <button id="bofaButton">bofa</button>
+			<button id="linkButton">link</button> -->
+			<div class="js-plaid-wrapper bank-info-wrapper plaid-wrapper">
+				<select id="js-institutions" class="dropdown">
+					<option value="">Pick a bank</option>
+				</select>
+
+				<button id="js-select-button" class="btn btn-main" disabled>Sign in with your bank</button>
+			</div>
+
+			<div class="js-manual-wrapper bank-info-wrapper manual-wrapper">
+				<div class="">
+					<label for="js-routing">Routing Number</label>
+					<input id="js-routing" class="input" type="text" />	
+				</div>
+				
+				<div class="">
+					<label for="js-account-number">Account Number</label>
+					<input id="js-account-number" class="input" type="text" />
+				</div>
+
+				<div class="">
+					<label for="js-type">Account Type</label>
+					<select id="js-type">
+						<option value="">Please choose one</option>
+						<option value="checking">Checking</option>
+						<option value="savings">Savings</option>
+					</select>
+				</div>
+			</div>
 		</div>
 
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 		<script src="https://cdn.plaid.com/link/stable/link-initialize.js"></script>
 		<script>
 			'use strict';
 
-			// test commit, remove later
-			var dropdown = document.querySelector('#institutions');
-			var selectButton = document.querySelector('#selectButton');
+			var $dropdown = $('#js-institutions');
+			var $selectButton = $('#js-select-button');
 
 			var linkHandler = Plaid.create({
 			  env: 'tartan',
@@ -43,7 +80,7 @@
 			    	var newOption = document.createElement('option');
 			    	newOption.setAttribute('value', linkHandler.institutions[i].type);
 			    	newOption.innerHTML = linkHandler.institutions[i].name;
-			    	dropdown.appendChild(newOption);
+			    	$dropdown.appendChild(newOption);
 			    }
 			  },
 			  onSuccess: function(public_token) {
@@ -56,29 +93,29 @@
 			  },
 			});
 
-			dropdown.onchange = function () {
+			$dropdown.onchange = function () {
 				if (this.value) {
-					selectButton.disabled = false;
+					$selectButton.disabled = false;
 				} else {
-					selectButton.disabled = true;
+					$selectButton.disabled = true;
 				}
 			}
 
-			selectButton.onclick = function () {
+			$selectButton.onclick = function () {
 				if (!this.disabled) {
 					linkHandler.open(dropdown.value);
 				}
 			};
 
 			// Trigger the BofA login view
-			document.getElementById('bofaButton').onclick = function() {
-			  linkHandler.open('bofa');
-			};
+			// document.getElementById('bofa-button').onclick = function() {
+			//   linkHandler.open('bofa');
+			// };
 
 			// Trigger the standard institution select view
-			document.getElementById('linkButton').onclick = function() {
-			  linkHandler.open();
-			};
+			// document.getElementById('link-button').onclick = function() {
+			//   linkHandler.open();
+			// };
 		</script>
 	</body>
 </html>
