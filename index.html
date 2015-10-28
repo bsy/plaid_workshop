@@ -131,10 +131,12 @@
 			    $dropdown.append(lastOption);
 			  },
 			  onSuccess: function(public_token) {
-			    // Send your public_token to your app server here.
+			    // Send your public_token to your app server here, or use the webhook option below.
 			    console.log('Plaid Link Success!');
 					console.log('Public Token: ' + public_token);
 			  },
+				// See https://plaid.com/docs/#webhook for more info
+				// webhook: 'http(s)://(www.)yourdomain.com/whatever_callback_url_you_create',
 			  onExit: function() {
 			    // The user exited the Link flow.
 			    console.log('user exited!');
