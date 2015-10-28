@@ -71,9 +71,9 @@
 				<div class="js-manual-wrapper bank-info-wrapper manual-wrapper">
 					<div class="field-block">
 						<label for="js-routing">Routing Number</label>
-						<input id="js-routing" class="input" type="text" />	
+						<input id="js-routing" class="input" type="text" />
 					</div>
-					
+
 					<div class="field-block">
 						<label for="js-account-number">Account Number</label>
 						<input id="js-account-number" class="input" type="text" />
@@ -132,7 +132,8 @@
 			  },
 			  onSuccess: function(public_token) {
 			    // Send your public_token to your app server here.
-			    console.log('success!');
+			    console.log('Plaid Link Success!');
+					console.log('Public Token: ' + public_token);
 			  },
 			  onExit: function() {
 			    // The user exited the Link flow.
